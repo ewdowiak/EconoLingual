@@ -1,8 +1,6 @@
 # EconoLingual / vocab-lists
 
-While developing [_Tradutturi Sicilianu_](https://translate.napizia.com), we obtained large improvements in translation quality by biasing the learned [subword vocabulary](https://www.doviak.net/pages/ml-sicilian/ml-scn_p04.shtml) towards the desinences one finds in a textbook.
-
-The method requires a vocabulary list for each language, so this directory creates them.
+While developing [_Tradutturi Sicilianu_](https://translate.napizia.com), we obtained large improvements in translation quality by biasing the learned [subword vocabulary](https://www.doviak.net/pages/ml-sicilian/ml-scn_p04.shtml) towards the desinences one finds in a textbook.  The method requires a vocabulary list for each language, so this directory creates them.
 
 ###  background
 
