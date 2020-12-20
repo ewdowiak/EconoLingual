@@ -90,7 +90,7 @@ foreach my $palora ( sort keys %dieli ) {
 	    $scword =~ s/\s$//g;
 
 	    ##  make lower case
-	    $scword = lc( $scword );
+	    #$scword = lc( $scword );
 
 	    ##  push it onto the holder
 	    push( @scarray , $scword );

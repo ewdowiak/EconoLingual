@@ -28,12 +28,15 @@ no warnings qw(uninitialized);
 
 require Exporter;
 our @ISA = qw(Exporter);
-our @EXPORT = qw( dedup edits1 edits2 correct );
+our @EXPORT = qw( correct );
 
 ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##
 
+##  vocabulary list
 my $infile = "/home/eryk/research/flatiron/github/05-01_EconoLingual/vocab-lists/sicilian/dieli-list.txt";
-    
+
+##  hold vocabulary in "number of words" hash
+##  NOTE:  the "dieli-list" counts will always be one
 my %NWORDS;
 open( INFILE, $infile) || die "could not open $infile";
 while (<INFILE>) {
@@ -45,36 +48,59 @@ close INFILE;
 
 ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##
 
-sub dedup {
-    my %hash = map { $_, 1 } @_;
-    return keys %hash;
+##  list of characters
+## my @allchars = ('0'..'9', 'A'..'Z', 'a'..'z', split("","ÀàÂâÁáÇçÈèÊêÉéÌìÎîÍíÏïÒòÔôÓóÙùÛûÚú"));
+my @allchars = ('A'..'Z', 'a'..'z', split("","ÀàÈèÌìÒòÙùÂâÊêÎîÔôÛû"));
+
+##  make single edits to the word
+sub edit_once {
+    my $inword = $_[0];
+
+    ##  make position index array
+    my $plen_word = length($inword) - 1;
+    my @pos_index = (0..$plen_word);
+
+    ##  use position index to split word into beginning and ending
+    ##  then trim a letter, swap a letter and insert a letter
+    my @edits = map {
+	##  fetch beginning and ending
+	my ($bgn, $end) = @{$_};
+	
+	##  trim, swap and insert
+	my $trim_letter  = $bgn . substr($end, 1) ;
+	my $swap_letter;
+	{ no warnings;
+	  $swap_letter = $bgn . substr($end, 1, 1) . substr($end, 0, 1) . substr($end, 2); }
+	my @inserts = map { ($bgn . $_ . substr($end,1) , $bgn . $_ . $end) } @allchars ;
+	
+	##  create the array for mapping
+	( $trim_letter , $swap_letter , @inserts );
+	
+    } map {
+	##  beginning of word , ending of word
+	[substr($inword, 0, $_), substr($inword, $_)]
+    } @pos_index ;
+
+    ##  return the edits
+    return @edits;
 }
 
-sub edits1 {
-    my $word = shift;
 
-    dedup( map { ($a, $b) = @{$_};
-		 { no warnings;
-		   ( $a . substr($b, 1),
-		     $a . substr($b, 1, 1) . substr($b, 0, 1) . substr($b, 2),
-		     map { ($a . $_ . substr($b,1), $a . $_ . $b) } 'a'..'z' );
-		 }
-	   } map {
-	       [substr($word, 0, $_), substr($word, $_)]
-	   }
-	   0..length($word)-1
-	);
+##  for two edits, repeat the process
+sub edit_twice {
+    my $inword = $_[0];
+    my @edits  = map { edit_once($_) } edit_once($inword);
+    return @edits;
 }
 
-sub edits2 {
-    dedup( map { edits1($_) } edits1(shift));
-}
 
+##  predict correct spelling based on "number of words"
 sub correct {
-    my $win = shift;
+    my $inword = $_[0];
+    my $otword = $inword;
     
-    for (edits1($win), edits2($win)) {
-	$win = $_ if ($NWORDS{$_} > $NWORDS{$win});
+    foreach my $word (edit_once($inword), edit_twice($inword)) {
+	$otword = ($NWORDS{$word} > $NWORDS{$otword}) ? $word : $otword ;
     }
-    return $win;
+    return $otword;
 } 

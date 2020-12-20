@@ -24,7 +24,6 @@
 
 use strict;
 use warnings;
-#no warnings qw(uninitialized);
 
 use lib $ENV{PWD} .'/lib';
 use Napizia::SpellCheck;
