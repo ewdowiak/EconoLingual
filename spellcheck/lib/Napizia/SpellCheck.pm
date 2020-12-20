@@ -121,5 +121,5 @@ sub correct {
     foreach my $word (edit_once($inword), edit_twice($inword)) {
 	$otword = ($NWORDS{$word} > $NWORDS{$otword}) ? $word : $otword ;
     }
-    return $otword . " -- " . $NWORDS{$otword};
+    return $otword ;
 } 
