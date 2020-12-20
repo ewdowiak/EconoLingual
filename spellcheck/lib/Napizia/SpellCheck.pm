@@ -35,8 +35,10 @@ our @EXPORT = qw( correct );
 ##  vocabulary list
 my $infile = "/home/eryk/research/flatiron/github/05-01_EconoLingual/vocab-lists/sicilian/dieli-list.txt";
 
-##  hold vocabulary in "number of words" hash
-##  NOTE:  the "dieli-list" counts will always be one
+##  lemmatized sicilian text
+my $sicilian = "/home/eryk/research/flatiron/github/05-00_mod-five/00-00_Sicilian_Translator/embeddings/dataset/train-mparamu_v2-lemmatized.sc";
+
+##  place Arthur Dieli's vocabulary into a "number of words" hash
 my %NWORDS;
 open( INFILE, $infile) || die "could not open $infile";
 while (<INFILE>) {
@@ -45,6 +47,23 @@ while (<INFILE>) {
     $NWORDS{$line} += 1 ;
 }
 close INFILE;
+
+##  add counts if in Arthur Dieli's vocabulary
+open( SICILIAN, $sicilian) || die "could not open $sicilian";
+while (<SICILIAN>) {
+    chomp;
+    my $line = $_;
+    my @words = split( /\s/ , $line);
+
+    foreach my $word (@words) {
+	if ( ! defined $NWORDS{$word} ) {
+	    my $blah = "do nothing";
+	} else {
+	    $NWORDS{$word} += 1 ;
+	}
+    }
+}
+close SICILIAN;
 
 ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##  ##
 
@@ -102,5 +121,5 @@ sub correct {
     foreach my $word (edit_once($inword), edit_twice($inword)) {
 	$otword = ($NWORDS{$word} > $NWORDS{$otword}) ? $word : $otword ;
     }
-    return $otword;
+    return $otword . " -- " . $NWORDS{$otword};
 } 
